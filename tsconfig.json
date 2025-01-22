@@ -7,9 +7,11 @@
     "strict": true,
     "skipLibCheck": true,
     "outDir": "./dist",            // A pasta de saída do build será "dist" dentro de "server"
-    "rootDir": "."                 // O código-fonte está no diretório atual (dentro de "server")
+    "rootDir": ".",                 // O código-fonte está no diretório atual (dentro de "server")
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "**/*.ts"                       // Incluir todos os arquivos .ts dentro de "server"
-  ]
+  ],
+  "exclude": ["node_modules", "dist"]
 }
