@@ -1,26 +1,30 @@
 import { Request, Response } from 'express'
 
-type CartProps = {
+interface DishProps {
+  foto: string
+  preco: number
   id: string
   nome: string
+  descricao: string
+  porcao: string
 }
 
-let cartItems: CartProps[] = []
+let cartItems: DishProps[] = []
 
 export const addItemToCart = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { id, nome }: { id: string; nome: string } = req.body
+  const { id, nome, descricao, porcao, preco, foto }: DishProps = req.body
 
   try {
-    const itemExist = cartItems.find((item) => item.id === id)
+    const itemExist = cartItems.find((item) => Number(item.id) === Number(id))
 
     if (itemExist) {
       return res.status(400).json({ message: 'Esse item já está no carrinho' })
     }
 
-    cartItems.push({ id, nome })
+    cartItems.push({ id, nome, descricao, porcao, preco, foto })
     return res
       .status(201)
       .json({ message: 'Item adicionado ao carrinho com sucesso' })
@@ -37,7 +41,7 @@ export const getItemFromId = async (
   const id = req.params.id
 
   try {
-    const item = cartItems.find((item) => item.id === id)
+    const item = cartItems.find((item) => Number(item.id) === Number(id))
 
     if (!item) {
       return res
@@ -59,7 +63,7 @@ export const removeItemFromId = async (
   const id = req.params.id
 
   try {
-    const itemExist = cartItems.find((item) => item.id === id)
+    const itemExist = cartItems.find((item) => Number(item.id) === Number(id))
 
     if (!itemExist) {
       return res
