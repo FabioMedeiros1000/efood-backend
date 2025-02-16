@@ -73,6 +73,7 @@ export const removeItemFromId = async (
 
     cartItems = cartItems.filter((item) => Number(item.id) !== Number(id))
 
+    console.log('item deletado com sucesso')
     return res.status(200).json({
       message: 'Item removido do carrinho com sucesso',
       cartItems
