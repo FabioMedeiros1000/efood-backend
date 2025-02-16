@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import pool from '../config/db.js'
 
 interface DishProps {
   foto: string
@@ -9,22 +10,32 @@ interface DishProps {
   porcao: string
 }
 
-let cartItems: DishProps[] = []
+interface CartItemProps extends DishProps {
+  userId: string
+}
 
 export const addItemToCart = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { id, nome, descricao, porcao, preco, foto }: DishProps = req.body
+  const { userId, id, nome, descricao, porcao, preco, foto }: CartItemProps =
+    req.body
 
   try {
-    const itemExist = cartItems.find((item) => Number(item.id) === Number(id))
+    const result = await pool.query(
+      'SELECT * FROM cart_items WHERE user_id = $1 AND dish_id = $2',
+      [userId, id]
+    )
 
-    if (itemExist) {
+    if (result.rows.length > 0) {
       return res.status(400).json({ message: 'Esse item já está no carrinho' })
     }
 
-    cartItems.push({ id, nome, descricao, porcao, preco, foto })
+    await pool.query(
+      'INSERT INTO cart_items (user_id, dish_id, nome, descricao, porcao, preco, foto) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [userId, id, nome, descricao, porcao, preco, foto]
+    )
+
     return res
       .status(201)
       .json({ message: 'Item adicionado ao carrinho com sucesso' })
@@ -38,18 +49,24 @@ export const getItemFromId = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const id = req.params.id
+  const userId = req.params.userId
+  const dishId = req.params.dishId
 
   try {
-    const item = cartItems.find((item) => Number(item.id) === Number(id))
+    const result = await pool.query(
+      'SELECT * FROM cart_items WHERE user_id = $1 AND dish_id = $2',
+      [userId, dishId]
+    )
 
-    if (!item) {
+    if (result.rows.length === 0) {
       return res
         .status(400)
         .json({ message: 'O item não está presente no carrinho' })
     }
 
-    return res.status(200).json({ message: 'Item obtido com sucesso', item })
+    return res
+      .status(200)
+      .json({ message: 'Item obtido com sucesso', item: result.rows[0] })
   } catch (error) {
     console.error('Erro ao obter item do carrinho:', error)
     return res.status(500).json({ message: 'Erro interno no servidor' })
@@ -60,24 +77,29 @@ export const removeItemFromId = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  const userId = req.params.userId
   const id = req.params.id
 
   try {
-    const itemExist = cartItems.find((item) => Number(item.id) === Number(id))
+    const result = await pool.query(
+      'SELECT * FROM cart_items WHERE user_id = $1 AND id = $2',
+      [userId, id]
+    )
 
-    if (!itemExist) {
+    if (result.rows.length === 0) {
       return res
         .status(400)
         .json({ message: 'Item não encontrado no carrinho' })
     }
 
-    cartItems = cartItems.filter((item) => Number(item.id) !== Number(id))
+    await pool.query('DELETE FROM cart_items WHERE user_id = $1 AND id = $2', [
+      userId,
+      id
+    ])
 
-    console.log('item deletado com sucesso')
-    return res.status(200).json({
-      message: 'Item removido do carrinho com sucesso',
-      cartItems
-    })
+    return res
+      .status(200)
+      .json({ message: 'Item removido do carrinho com sucesso' })
   } catch (error) {
     console.error('Erro ao remover item do carrinho:', error)
     return res.status(500).json({ message: 'Erro interno no servidor' })
@@ -88,10 +110,17 @@ export const getAllItems = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  const userId = req.params.userId
+
   try {
+    const result = await pool.query(
+      'SELECT * FROM cart_items WHERE user_id = $1',
+      [userId]
+    )
+
     return res
       .status(200)
-      .json({ message: 'Itens obtidos com sucesso', cartItems })
+      .json({ message: 'Itens obtidos com sucesso', items: result.rows })
   } catch (error) {
     console.error('Erro ao obter itens do carrinho:', error)
     return res.status(500).json({ message: 'Erro interno no servidor' })
@@ -102,11 +131,14 @@ export const deleteAllItems = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  const userId = req.params.userId
+
   try {
-    cartItems = []
+    await pool.query('DELETE FROM cart_items WHERE user_id = $1', [userId])
+
     return res
       .status(200)
-      .json({ message: 'Itens deletados com sucesso', cartItems })
+      .json({ message: 'Todos os itens foram deletados com sucesso' })
   } catch (error) {
     console.error('Erro ao deletar itens do carrinho:', error)
     return res.status(500).json({ message: 'Erro interno no servidor' })

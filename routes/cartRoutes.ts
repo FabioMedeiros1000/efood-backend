@@ -10,9 +10,9 @@ import {
 const router = express.Router()
 
 router.post('/add', addItemToCart)
-router.get('/', getAllItems)
+router.get('/:userId', getAllItems)
 router.get('/:id', getItemFromId)
-router.delete('/', deleteAllItems)
-router.delete('/:id', removeItemFromId)
+router.delete('/:userId', deleteAllItems)
+router.delete('/:userId/:id', removeItemFromId)
 
 export default router
