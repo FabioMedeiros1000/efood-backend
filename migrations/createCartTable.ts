@@ -16,7 +16,7 @@ export const createCartTable = async () => {
         foto TEXT NOT NULL
       )
     `)
-    console.log('Tabela do carrinho criado com sucesso')
+    console.log('Tabela do carrinho criado com sucesso!')
   } catch (error) {
     console.error('Erro ao criar a tabela do carrinho:', error)
   } finally {
