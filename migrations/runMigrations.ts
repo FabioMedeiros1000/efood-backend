@@ -1,7 +1,9 @@
+import { createCartTable } from './createCartTable'
 import { createTable } from './createUsersTable'
 
 async function runMigrations() {
   await createTable()
+  await createCartTable()
   console.log('Migrations rodadas com sucesso')
 }
 
