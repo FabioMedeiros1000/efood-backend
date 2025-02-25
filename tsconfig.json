@@ -8,11 +8,9 @@
     "skipLibCheck": true,
     "outDir": "./dist",
     "rootDir": ".",
-    "forceConsistentCasingInFileNames": true,
+    "forceConsistentCasingInFileNames": true
   },
-  "include": [
-    "**/*.ts"
-  ],
+  "include": ["**/*.ts"],
   "exclude": ["node_modules", "dist"],
   "ts-node": {
     "experimentalSpecifierResolution": "node",

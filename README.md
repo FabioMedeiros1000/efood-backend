@@ -21,4 +21,3 @@ Este repositório contém o back-end da aplicação **eFood**, desenvolvido para
 
 - **Login**: https://efood-backend.onrender.com/api/auth/login
 - **Cadastro de usuários**: https://efood-backend.onrender.com/api/auth/signup
-
